@@ -7,6 +7,18 @@
 -- No hace publicos los perfiles privados fuera de sus grupos.
 -- ==========================================================
 
+create or replace function public.is_group_member(p_group uuid)
+returns boolean language sql stable security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.group_members
+    where group_id = p_group
+      and user_id = auth.uid()
+  );
+$$;
+
 drop policy if exists profiles_read on public.profiles;
 create policy profiles_read on public.profiles for select
   using (
@@ -14,10 +26,9 @@ create policy profiles_read on public.profiles for select
     or id = auth.uid()
     or exists (
       select 1
-      from public.group_members mine
-      join public.group_members theirs on theirs.group_id = mine.group_id
-      where mine.user_id = auth.uid()
-        and theirs.user_id = profiles.id
+      from public.group_members theirs
+      where theirs.user_id = profiles.id
+        and public.is_group_member(theirs.group_id)
     )
   );
 
@@ -26,10 +37,5 @@ drop policy if exists group_members_read_group on public.group_members;
 create policy group_members_read_group on public.group_members for select
   using (
     user_id = auth.uid()
-    or exists (
-      select 1
-      from public.group_members mine
-      where mine.group_id = group_members.group_id
-        and mine.user_id = auth.uid()
-    )
+    or public.is_group_member(group_id)
   );
