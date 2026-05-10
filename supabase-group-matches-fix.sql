@@ -53,13 +53,13 @@ as $$
       left join public.user_stickers us
         on us.sticker_id = s.id
        and us.user_id = p_user
-      where coalesce(us.count, 0) = 0
+      where coalesce(us."count", 0) = 0
     ),
     my_avail as (
       select us.sticker_id
       from public.user_stickers us
       where us.user_id = p_user
-        and us.count >= 2
+        and us."count" >= 2
     ),
     they_give as (
       select
@@ -72,7 +72,7 @@ as $$
       from public.user_stickers us
       join my_missing mm on mm.sticker_id = us.sticker_id
       where us.user_id in (select id from others)
-        and us.count >= 2
+        and us."count" >= 2
       group by us.user_id
     ),
     i_give as (
@@ -88,7 +88,7 @@ as $$
       left join public.user_stickers ous
         on ous.user_id = o.id
        and ous.sticker_id = ma.sticker_id
-      where coalesce(ous.count, 0) = 0
+      where coalesce(ous."count", 0) = 0
       group by o.id
     )
   select
