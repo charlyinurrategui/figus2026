@@ -7,6 +7,8 @@
 -- - figuritas repetidas tuyas que otros miembros necesitan
 -- ==========================================================
 
+drop function if exists public.f_group_matches(uuid, uuid);
+
 create or replace function public.f_group_matches(p_user uuid, p_group uuid)
 returns table (
   other_user uuid,
@@ -17,6 +19,8 @@ returns table (
   whatsapp text,
   they_give_me int,
   i_give_them int,
+  they_give_list text[],
+  i_give_list text[],
   score int,
   group_name text
 )
@@ -58,7 +62,13 @@ as $$
         and us.count >= 2
     ),
     they_give as (
-      select us.user_id as other_user, count(*)::int as n
+      select
+        us.user_id as other_user,
+        count(*)::int as n,
+        array_agg(
+          split_part(us.sticker_id, '-', 1) || ' ' || (split_part(us.sticker_id, '-', 2)::int)::text
+          order by split_part(us.sticker_id, '-', 1), split_part(us.sticker_id, '-', 2)::int
+        ) as items
       from public.user_stickers us
       join my_missing mm on mm.sticker_id = us.sticker_id
       where us.user_id in (select id from others)
@@ -66,7 +76,13 @@ as $$
       group by us.user_id
     ),
     i_give as (
-      select o.id as other_user, count(*)::int as n
+      select
+        o.id as other_user,
+        count(*)::int as n,
+        array_agg(
+          split_part(ma.sticker_id, '-', 1) || ' ' || (split_part(ma.sticker_id, '-', 2)::int)::text
+          order by split_part(ma.sticker_id, '-', 1), split_part(ma.sticker_id, '-', 2)::int
+        ) as items
       from others o
       join my_avail ma on true
       left join public.user_stickers ous
@@ -84,6 +100,8 @@ as $$
     p.whatsapp,
     coalesce(tg.n, 0) as they_give_me,
     coalesce(ig.n, 0) as i_give_them,
+    coalesce(tg.items, array[]::text[]) as they_give_list,
+    coalesce(ig.items, array[]::text[]) as i_give_list,
     (least(coalesce(tg.n, 0), coalesce(ig.n, 0)) * 2
       + coalesce(tg.n, 0)
       + coalesce(ig.n, 0))::int as score,
