@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0f1a" />
+<title>Figuritas Mundial 2026 — Intercambio</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --bg-2: #131a2a;
+    --card: #1a2238;
+    --card-2: #222b47;
+    --text: #e6ecff;
+    --muted: #8a93b3;
+    --accent: #ffd400;
+    --accent-2: #ff5a87;
+    --good: #3fd17d;
+    --bad: #ff5a5a;
+    --border: #2a3358;
+    --shadow: 0 6px 24px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+  }
+  /* Fondo: tapa Panini WC2026 */
+  .stadium-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    background: #ffffff;
+  }
+  .stadium-bg svg { width: 100%; height: 100%; display: block; }
+  .stadium-bg::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(11,15,26,.45) 0%, rgba(11,15,26,.78) 55%, rgba(11,15,26,.9) 100%);
+  }
+  header.top, main, nav.tabs, .modal-bg, .login-bg, .toast { position: relative; z-index: 2; }
+  header.top { backdrop-filter: blur(6px); }
+  nav.tabs { backdrop-filter: blur(8px); background: rgba(13,19,34,.85) !important; }
+  a { color: var(--accent); }
+  button { font: inherit; }
+  /* Layout */
+  header.top {
+    position: sticky; top: 0; z-index: 10;
+    background: linear-gradient(180deg, #11172a 0%, #0b0f1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  header.top h1 { font-size: 16px; margin: 0; letter-spacing: .3px; }
+  header.top .badge {
+    background: var(--accent); color: #1a1a1a; padding: 3px 8px; border-radius: 999px;
+    font-weight: 700; font-size: 11px;
+  }
+  header.top .who { margin-left: auto; font-size: 13px; color: var(--muted); display:flex; gap:8px; align-items:center;}
+  header.top .who button { background: transparent; color: var(--text); border: 1px solid var(--border); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+  main { padding: 16px; max-width: 1100px; margin: 0 auto 90px; }
+  /* Tabs */
+  nav.tabs {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    background: #0d1322; border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 9;
+  }
+  nav.tabs button {
+    background: transparent; color: var(--muted); border: none; padding: 12px 4px;
+    font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  nav.tabs button.active { color: var(--accent); }
+  nav.tabs .ico { font-size: 18px; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
+  .stat .num { font-size: 20px; font-weight: 700; color: var(--accent); }
+  .stat .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+
+  /* Progress bar */
+  .progress {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 12px 14px; margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .progress-head {
+    display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px;
+  }
+  .progress-head .pct {
+    font-size: 22px; font-weight: 800; color: var(--accent); letter-spacing: .5px;
+  }
+  .progress-head .lbl {
+    font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
+  }
+  .progress-head .of {
+    margin-left: auto; font-size: 12px; color: var(--muted);
+  }
+  .progress-bar {
+    position: relative; height: 14px; border-radius: 999px; overflow: hidden;
+    background: linear-gradient(180deg, #0e1428, #161e36);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.5);
+  }
+  .progress-bar .fill {
+    position: absolute; top: 0; left: 0; bottom: 0; width: 0%;
+    background: linear-gradient(90deg, #75AADB 0%, #ffffff 50%, #75AADB 100%);
+    box-shadow: 0 0 14px rgba(255,212,0,.35);
+    transition: width .5s cubic-bezier(.2,.8,.2,1);
+  }
+  .progress-bar .fill::after {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(135deg,
+      rgba(255,255,255,.15) 0 8px,
+      rgba(255,255,255,0)  8px 16px);
+    opacity: .6;
+  }
+  .progress-bar .star {
+    position: absolute; top: 50%; transform: translate(-50%,-50%);
+    font-size: 14px; pointer-events: none;
+  }
+  .progress-celebrate { color: var(--accent); font-weight: 700; }
+
+  /* Filters */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .filters input, .filters select {
+    background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 10px; font-size: 14px; outline: none;
+  }
+  .filters input { flex: 1; min-width: 180px; }
+  .code-lookup {
+    background: rgba(26, 34, 56, .9); border: 1px solid var(--border); border-radius: 14px;
+    padding: 12px; margin-bottom: 12px; box-shadow: var(--shadow);
+  }
+  .code-lookup .lookup-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .code-lookup input {
+    flex: 1; min-width: 160px; background: var(--card); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px; font-size: 15px; text-transform: uppercase; outline: none;
+  }
+  .code-lookup .lookup-result { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .lookup-card {
+    display: flex; gap: 10px; align-items: flex-start; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px;
+  }
+  .lookup-card strong { color: var(--text); display: block; margin-bottom: 3px; }
+  .lookup-card .lookup-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+  /* Sticker grid */
+  .group-title { font-size: 13px; color: var(--muted); margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .5px; }
+  .grid {
+    display: grid; gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  }
+  .sticker {
+    aspect-ratio: 3/4; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    position: relative; overflow: hidden; cursor: pointer; user-select: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px;
+    transition: transform .08s ease, border-color .15s ease, background .15s ease;
+  }
+  .sticker:hover { transform: translateY(-1px); }
+  .sticker .num { position: absolute; top: 4px; left: 6px; font-size: 9px; color: var(--muted); font-weight: 700; }
+  .sticker .name { font-size: 10px; color: var(--text); text-align: center; line-height: 1.15; padding: 0 2px; }
+  .sticker .cat { font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .sticker.have { background: linear-gradient(160deg, #1f3b2a, #14211a); border-color: #2a5b3c; }
+  .sticker.have .num { color: #b6f5cf; }
+  .sticker.dup { background: linear-gradient(160deg, #3a2f12, #211a0c); border-color: #7a601f; }
+  .sticker.dup .num { color: #ffe486; }
+  .sticker .count {
+    position: absolute; bottom: 4px; right: 6px;
+    background: rgba(0,0,0,.5); color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 999px;
+  }
+  .sticker.dup .count { background: var(--accent); color: #000; font-weight: 800; }
+
+  /* Sticker detail modal */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+  .modal-bg.show { display: flex; }
+  .modal { background: var(--bg-2); border: 1px solid var(--border); border-radius: 16px; padding: 18px; max-width: 380px; width: 100%; box-shadow: var(--shadow); }
+  .modal h3 { margin: 0 0 4px; font-size: 18px; }
+  .modal .sub { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .counter { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 12px 0 18px; }
+  .counter button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--card-2); color: var(--text); font-size: 22px; cursor: pointer; }
+  .counter .val { font-size: 32px; font-weight: 800; min-width: 56px; text-align: center; }
+  .modal .actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal .actions button { padding: 9px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-2); color: var(--text); cursor: pointer; }
+  .modal .actions .primary { background: var(--accent); color: #1a1a1a; border-color: var(--accent); font-weight: 700; }
+
+  /* Empty / list states */
+  .empty { color: var(--muted); text-align: center; padding: 40px 16px; border: 1px dashed var(--border); border-radius: 12px; }
+
+  /* List rows (matches, contact) */
+  .row { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+  .row .row-h { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .row .row-h .av { width: 36px; height: 36px; border-radius: 50%; background: var(--card-2); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .row .row-h .meta { display: flex; flex-direction: column; }
+  .row .row-h .meta .name { font-weight: 600; }
+  .row .row-h .meta .loc { font-size: 12px; color: var(--muted); }
+  .row .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .pill { background: var(--card-2); border: 1px solid var(--border); padding: 3px 8px; border-radius: 999px; font-size: 11px; }
+  .pill.good { background: #1f3b2a; border-color: #2a5b3c; color: #b6f5cf; }
+  .pill.bad  { background: #3b1f1f; border-color: #5b2a2a; color: #ffb6b6; }
+  .row .row-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .btn { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-2); color: var(--text); cursor: pointer; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  .btn.primary { background: var(--accent); color: #1a1a1a; border-color: var(--accent); font-weight: 700; }
+  .btn.success { background: var(--good); color: #0a2a17; border-color: var(--good); font-weight: 700; }
+
+  /* Profile */
+  .form { display: grid; gap: 12px; max-width: 420px; }
+  .form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
+  .form input, .form textarea, .form select {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none;
+  }
+  .form .help { font-size: 12px; color: var(--muted); }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: var(--card-2); border: 1px solid var(--border); padding: 10px 14px;
+    border-radius: 12px; box-shadow: var(--shadow); z-index: 100; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Login screen */
+  .login-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-start; justify-content: center;
+    z-index: 200; padding: 16px; overflow: auto;
+  }
+  .login-bg.hidden { display: none; }
+  .login-card {
+    background: rgba(26, 34, 56, .96); border: 1px solid var(--border); border-radius: 18px;
+    padding: 22px 20px; max-width: 420px; width: 100%; margin: 18px 0 28px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .login-card h2 { margin: 0 0 4px; font-size: 20px; }
+  .login-card .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  .login-card .stars { font-size: 22px; letter-spacing: 4px; margin-bottom: 6px; }
+  .login-card .modes { display: flex; gap: 6px; margin-bottom: 14px; }
+  .login-card .mode {
+    flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-2);
+    color: var(--muted); font-size: 12px; cursor: pointer; text-align: center;
+  }
+  .login-card .mode.active { color: var(--accent); border-color: var(--accent); background: rgba(255,212,0,.08); }
+  .login-card .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .login-card .err { color: #ffb6b6; font-size: 12px; margin-top: 6px; min-height: 16px; }
+  .login-card .auth-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Reading the cards on top of the background */
+  .stat, .row, .modal, .login-card, .sticker { background-image: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,0)); }
+  .row { background-color: rgba(26, 34, 56, .85); backdrop-filter: blur(4px); }
+
+  @media (min-width: 720px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+    .stats { grid-template-columns: repeat(4, 1fr); }
+    .login-card { max-width: 760px; }
+    .login-card .form { max-width: none; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+    .login-card .row2, #loginSbBox, #loginErr, .login-card .auth-actions { grid-column: 1 / -1; }
+  }
+  @media (max-width: 520px) {
+    .login-card { padding: 18px 16px; margin-top: 8px; }
+    .login-card .row2 { grid-template-columns: 1fr; }
+    .login-card .auth-actions .btn { flex: 1; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Fondo: Tapa oficial Panini FIFA World Cup 2026 (recreación SVG) -->
+<div class="stadium-bg" aria-hidden="true">
+<svg viewBox="0 0 800 1200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldT" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#fff2a8"/>
+      <stop offset="40%"  stop-color="#ffd400"/>
+      <stop offset="100%" stop-color="#a07a10"/>
+    </linearGradient>
+    <radialGradient id="goldR" cx="35%" cy="30%" r="80%">
+      <stop offset="0%"   stop-color="#ffe98c"/>
+      <stop offset="55%"  stop-color="#e3a90c"/>
+      <stop offset="100%" stop-color="#7a5910"/>
+    </radialGradient>
+    <!-- Petalo: forma de "uña" / scallop -->
+    <symbol id="petalL" viewBox="0 0 140 90" overflow="visible">
+      <path d="M 0,90 L 140,90 Q 140,0 0,0 Z"/>
+    </symbol>
+    <symbol id="petalR" viewBox="0 0 140 90" overflow="visible">
+      <path d="M 0,0 L 140,0 Q 140,90 0,90 Z"/>
+    </symbol>
+  </defs>
+
+  <!-- Fondo blanco -->
+  <rect width="800" height="1200" fill="#ffffff"/>
+
+  <!-- Borde lateral izquierdo: petalos multicolor -->
+  <g transform="translate(0 0)">
+    <use href="#petalL" x="0"   y="0"   width="155" height="100" fill="#FF7A19"/>
+    <use href="#petalR" x="0"   y="90"  width="155" height="100" fill="#1A6CD9"/>
+    <use href="#petalL" x="0"   y="180" width="155" height="100" fill="#FFE062"/>
+    <use href="#petalR" x="0"   y="270" width="155" height="100" fill="#A4D33B"/>
+    <use href="#petalL" x="0"   y="360" width="155" height="100" fill="#7ABCDB"/>
+    <use href="#petalR" x="0"   y="450" width="155" height="100" fill="#8B1F2E"/>
+    <use href="#petalL" x="0"   y="540" width="155" height="100" fill="#1F8A3D"/>
+    <use href="#petalR" x="0"   y="630" width="155" height="100" fill="#C24A38"/>
+    <use href="#petalL" x="0"   y="720" width="155" height="100" fill="#A4D33B"/>
+    <use href="#petalR" x="0"   y="810" width="155" height="100" fill="#F2C4B0"/>
+    <use href="#petalL" x="0"   y="900" width="155" height="100" fill="#FFE062"/>
+    <use href="#petalR" x="0"   y="990" width="155" height="100" fill="#1A6CD9"/>
+    <use href="#petalL" x="0"   y="1080" width="155" height="100" fill="#FF7A19"/>
+    <!-- segunda capa (petalos pequeños desplazados) -->
+    <use href="#petalR" x="-30" y="50"  width="120" height="80" fill="#7ABCDB"/>
+    <use href="#petalL" x="-30" y="225" width="120" height="80" fill="#8B1F2E"/>
+    <use href="#petalR" x="-30" y="395" width="120" height="80" fill="#FFE062"/>
+    <use href="#petalL" x="-30" y="565" width="120" height="80" fill="#1F8A3D"/>
+    <use href="#petalR" x="-30" y="755" width="120" height="80" fill="#C24A38"/>
+    <use href="#petalL" x="-30" y="935" width="120" height="80" fill="#A4D33B"/>
+  </g>
+
+  <!-- Borde lateral derecho: petalos multicolor (mirror) -->
+  <g transform="translate(800 0) scale(-1 1)">
+    <use href="#petalL" x="0"   y="20"   width="155" height="100" fill="#C24A38"/>
+    <use href="#petalR" x="0"   y="110"  width="155" height="100" fill="#FFE062"/>
+    <use href="#petalL" x="0"   y="200"  width="155" height="100" fill="#1A6CD9"/>
+    <use href="#petalR" x="0"   y="290"  width="155" height="100" fill="#8B1F2E"/>
+    <use href="#petalL" x="0"   y="380"  width="155" height="100" fill="#1F8A3D"/>
+    <use href="#petalR" x="0"   y="470"  width="155" height="100" fill="#0F3FA5"/>
+    <use href="#petalL" x="0"   y="560"  width="155" height="100" fill="#FFE062"/>
+    <use href="#petalR" x="0"   y="650"  width="155" height="100" fill="#1A6CD9"/>
+    <use href="#petalL" x="0"   y="740"  width="155" height="100" fill="#C24A38"/>
+    <use href="#petalR" x="0"   y="830"  width="155" height="100" fill="#7ABCDB"/>
+    <use href="#petalL" x="0"   y="920"  width="155" height="100" fill="#8B1F2E"/>
+    <use href="#petalR" x="0"   y="1010" width="155" height="100" fill="#FFE062"/>
+    <use href="#petalL" x="0"   y="1100" width="155" height="100" fill="#A4D33B"/>
+    <!-- capa secundaria -->
+    <use href="#petalR" x="-30" y="70"   width="120" height="80" fill="#FFE062"/>
+    <use href="#petalL" x="-30" y="245"  width="120" height="80" fill="#A4D33B"/>
+    <use href="#petalR" x="-30" y="425"  width="120" height="80" fill="#FF7A19"/>
+    <use href="#petalL" x="-30" y="605"  width="120" height="80" fill="#7ABCDB"/>
+    <use href="#petalR" x="-30" y="785"  width="120" height="80" fill="#1F8A3D"/>
+    <use href="#petalL" x="-30" y="965"  width="120" height="80" fill="#C24A38"/>
+  </g>
+
+  <!-- ZONA CENTRAL: contenido del album -->
+  <g font-family="Impact, 'Arial Black', sans-serif">
+    <!-- "OFFICIAL STICKER COLLECTION" -->
+    <g transform="translate(220 120)" fill="#0a0a0a" font-size="38" letter-spacing="1">
+      <text>OFFICIAL STICKER</text>
+      <text y="48">COLLECTION</text>
+    </g>
+
+    <!-- 26 grande con copa entre el 2 y el 6 -->
+    <!-- el "2" -->
+    <text x="220" y="600" font-size="380" fill="#0a0a0a" letter-spacing="-8">2</text>
+
+    <!-- la copa al medio -->
+    <g transform="translate(400 500) scale(1.35)" opacity="1">
+      <!-- base -->
+      <rect x="-58" y="120" width="116" height="20" rx="4" fill="#5b410a"/>
+      <rect x="-50" y="102" width="100" height="20" rx="3" fill="#86631a"/>
+      <!-- pedestal -->
+      <path d="M -42 102 L -28 32 L 28 32 L 42 102 Z" fill="url(#goldR)" stroke="#5b410a" stroke-width="2"/>
+      <text x="0" y="92" text-anchor="middle" font-size="16" fill="#0d3a26" font-family="Impact, sans-serif">FIFA WORLD CUP</text>
+      <rect x="-44" y="74" width="88" height="20" fill="#1f8a3d" opacity=".95"/>
+      <text x="0" y="91" text-anchor="middle" font-size="14" fill="#fff" font-family="Impact, sans-serif">FIFA WORLD CUP</text>
+      <!-- columnas -->
+      <path d="M -28 32 C -36 4 -36 -22 -14 -22 L -14 32 Z" fill="url(#goldR)" stroke="#5b410a" stroke-width="2"/>
+      <path d="M  28 32 C  36 4  36 -22  14 -22 L 14 32 Z" fill="url(#goldR)" stroke="#5b410a" stroke-width="2"/>
+      <!-- globo terraqueo -->
+      <ellipse cx="0" cy="-50" rx="44" ry="50" fill="url(#goldR)" stroke="#5b410a" stroke-width="2"/>
+      <ellipse cx="0" cy="-50" rx="44" ry="14" fill="none" stroke="#5b410a" stroke-width="1.4" opacity=".7"/>
+      <path d="M -34 -64 Q -8 -44 34 -70" stroke="#5b410a" stroke-width="1.4" fill="none" opacity=".55"/>
+      <path d="M -32 -36 Q  -2 -56 32 -36" stroke="#5b410a" stroke-width="1.4" fill="none" opacity=".55"/>
+      <!-- brillo -->
+      <ellipse cx="-14" cy="-66" rx="9" ry="18" fill="#fffbd9" opacity=".7"/>
+    </g>
+
+    <!-- el "6" -->
+    <text x="490" y="600" font-size="380" fill="#0a0a0a" letter-spacing="-8">6</text>
+
+    <!-- "FIFA" debajo de la copa, dentro del 26 -->
+    <text x="400" y="700" text-anchor="middle" font-size="92" fill="#0a0a0a" letter-spacing="2">FIFA</text>
+    <text x="555" y="704" font-size="22" fill="#0a0a0a">™</text>
+
+    <!-- "WORLD CUP 2026" -->
+    <text x="400" y="800" text-anchor="middle" font-size="62" fill="#0a0a0a" letter-spacing="1">WORLD CUP</text>
+    <text x="400" y="860" text-anchor="middle" font-size="58" fill="#0a0a0a" letter-spacing="1">2026</text>
+
+    <!-- subtitulo trilingüe -->
+    <g transform="translate(400 970)" text-anchor="middle" font-family="-apple-system, Helvetica, Arial, sans-serif" font-weight="700" fill="#0a0a0a">
+      <text font-size="18">STICKER ALBUM · ÁLBUM DE CROMOS</text>
+      <text y="22" font-size="18">ALBUM D'AUTOCOLLANTS</text>
+    </g>
+
+    <!-- PANINI badge -->
+    <g transform="translate(400 1060)">
+      <rect x="-78" y="-22" width="156" height="44" rx="6" fill="#1561c2"/>
+      <rect x="-78" y="-22" width="156" height="22" rx="6" fill="#ffd400"/>
+      <text x="0" y="14" text-anchor="middle" font-size="28" font-family="Impact, sans-serif" fill="#1561c2" letter-spacing="2">PANINI</text>
+      <!-- el chef logo (simplificado) -->
+      <circle cx="-58" cy="-2" r="14" fill="#ffd400" stroke="#1561c2" stroke-width="2"/>
+      <circle cx="-58" cy="-2" r="6"  fill="#e84b3a"/>
+      <rect x="-66" y="-18" width="16" height="6" fill="#ffd400" stroke="#1561c2" stroke-width="1.2"/>
+    </g>
+  </g>
+</svg>
+</div>
+
+<!-- Login bloqueante -->
+<div class="login-bg" id="loginBg">
+  <div class="login-card">
+    <div class="stars">🏆 ⚽ 📒</div>
+    <h2>Figuritas Mundial 2026</h2>
+    <div class="sub">Entrá con tu email y contraseña para recuperar tu progreso cada vez que volvés.</div>
+    <div class="modes">
+      <div class="mode active" data-mode="supabase">Online</div>
+      <div class="mode" data-mode="local">Probar local</div>
+    </div>
+    <div class="form" id="loginForm">
+      <label>Email
+        <input id="loginEmail" type="email" inputmode="email" placeholder="tu@email.com" autocomplete="email" />
+      </label>
+      <label>Contraseña
+        <input id="loginPassword" type="password" minlength="6" placeholder="Mínimo 6 caracteres" autocomplete="current-password" />
+        <span class="help">En modo online se usa Supabase Auth. En modo local solo se guarda en este navegador.</span>
+      </label>
+      <label>Apodo
+        <input id="loginName" placeholder="Cómo querés que te conozcan" />
+      </label>
+      <div class="row2">
+        <label>Ciudad
+          <input id="loginCity" placeholder="Ej: Buenos Aires" />
+        </label>
+        <label>País
+          <input id="loginCountry" placeholder="Ej: Argentina" value="Argentina" />
+        </label>
+      </div>
+      <label>Zona donde vivís
+        <input id="loginZone" placeholder="Ej: Palermo, Caballito, Quilmes…" />
+        <span class="help">Sirve para acercarte a usuarios cerca tuyo y coordinar el cambio en persona.</span>
+      </label>
+      <input id="loginWhats" type="hidden" />
+      <div id="loginSbBox" style="display:none">
+        <label>Supabase URL
+          <input id="loginSbUrl" placeholder="https://xxxx.supabase.co"/>
+        </label>
+        <label>Supabase anon key
+          <input id="loginSbKey" placeholder="eyJhbGciOi..."/>
+        </label>
+        <span class="help">Activá Email/Password en Supabase Auth. La sesión queda recordada en este navegador.</span>
+      </div>
+      <div class="err" id="loginErr"></div>
+      <div class="toolbar auth-actions">
+        <button class="btn primary" id="loginGo">Entrar</button>
+        <button class="btn" id="signupGo">Crear cuenta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<header class="top">
+  <span class="badge">WC2026</span>
+  <h1>Figuritas — Intercambio</h1>
+  <div class="who">
+    <span id="whoLabel">—</span>
+    <button id="syncBtn" title="Conectar Supabase">Online</button>
+  </div>
+</header>
+
+<main>
+  <!-- TAB: ÁLBUM -->
+  <section data-tab="album">
+    <div class="progress" id="progressBox">
+      <div class="progress-head">
+        <span class="pct" id="progressPct">0%</span>
+        <span class="lbl" id="progressLbl">del álbum completo</span>
+        <span class="of"  id="progressOf">0 / 0</span>
+      </div>
+      <div class="progress-bar">
+        <div class="fill" id="progressFill"></div>
+        <span class="star" id="progressStar" style="left:0%">⭐</span>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total</div></div>
+      <div class="stat"><div class="num" id="statHave">0</div><div class="lbl">Pegadas</div></div>
+      <div class="stat"><div class="num" id="statMissing">0</div><div class="lbl">Faltan</div></div>
+      <div class="stat"><div class="num" id="statDup">0</div><div class="lbl">Repetidas</div></div>
+    </div>
+    <div class="code-lookup">
+      <div class="lookup-row">
+        <input id="codeLookup" maxlength="7" placeholder="Código de figurita: ARG12 o ARG-012" autocomplete="off" />
+        <button class="btn primary" id="codeSearch">Buscar</button>
+      </div>
+      <div class="lookup-result" id="codeResult">Ingresá el código para saber si te falta, la tenés pegada o está repetida para cambiar.</div>
+    </div>
+    <div class="filters">
+      <input id="qAlbum" placeholder="Buscar nombre, número o equipo (ej: ARG, Messi, 045)" />
+      <select id="catAlbum">
+        <option value="">Todas las categorías</option>
+        <option value="fwc">FWC (FIFA World Cup)</option>
+        <option value="team">Escudos / Plantel</option>
+        <option value="player">Jugadores</option>
+        <option value="cc">Coca-Cola</option>
+      </select>
+      <select id="teamAlbum"><option value="">Todos los equipos</option></select>
+    </div>
+    <div id="albumView"></div>
+  </section>
+
+  <!-- TAB: FALTANTES -->
+  <section data-tab="missing" hidden>
+    <p class="group-title">Mis faltantes</p>
+    <div class="filters">
+      <input id="qMissing" placeholder="Filtrar faltantes" />
+      <button class="btn" id="copyMissing">Copiar lista</button>
+    </div>
+    <div id="missingView"></div>
+  </section>
+
+  <!-- TAB: DISPONIBLES -->
+  <section data-tab="dups" hidden>
+    <p class="group-title">Mis repetidas (disponibles para cambiar)</p>
+    <div class="filters">
+      <input id="qDups" placeholder="Filtrar repetidas" />
+      <button class="btn" id="copyDups">Copiar lista</button>
+    </div>
+    <div id="dupsView"></div>
+  </section>
+
+  <!-- TAB: MATCHES -->
+  <section data-tab="matches" hidden>
+    <p class="group-title">Coincidencias con otros usuarios</p>
+    <div class="filters">
+      <input id="qMatch" placeholder="Filtrar por usuario o ciudad" />
+      <select id="modeMatch">
+        <option value="bidir">Match bidireccional (yo le doy / él me da)</option>
+        <option value="have">Tienen lo que me falta</option>
+        <option value="need">Necesitan lo que me sobra</option>
+      </select>
+    </div>
+    <div id="matchView"></div>
+    <p class="empty" id="matchHint" style="margin-top:14px">
+      Para ver matches reales necesitás conectar Supabase. Mientras tanto se muestran usuarios de demo para validar el flujo.
+    </p>
+  </section>
+
+  <!-- TAB: PERFIL -->
+  <section data-tab="me" hidden>
+    <p class="group-title">Mi perfil</p>
+    <div class="form">
+      <label>Email
+        <input id="pEmail" type="email" disabled />
+        <span class="help">Tu email es tu identidad. Para cambiarlo, cerrá sesión y volvé a entrar.</span>
+      </label>
+      <label>Nombre / Apodo
+        <input id="pName" placeholder="Ej: Charly" />
+      </label>
+      <label>WhatsApp (con código de país, sin +)
+        <input id="pWhats" placeholder="Ej: 5491155551234" />
+        <span class="help">Se usa para abrir el chat al coordinar un cambio.</span>
+      </label>
+      <div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <label>Ciudad
+          <input id="pCity" placeholder="Ej: Buenos Aires" />
+        </label>
+        <label>País
+          <input id="pCountry" placeholder="Ej: Argentina" />
+        </label>
+      </div>
+      <label>Zona / Barrio
+        <input id="pZone" placeholder="Ej: Palermo, Caballito, La Plata…" />
+        <span class="help">Aparece en tu perfil para que otros usuarios sepan dónde encontrarte para el cambio.</span>
+      </label>
+      <label>Visibilidad
+        <select id="pVis">
+          <option value="public">Pública (aparezco en matches)</option>
+          <option value="private">Privada (no aparezco)</option>
+        </select>
+      </label>
+      <div class="toolbar">
+        <button class="btn primary" id="saveProfile">Guardar</button>
+        <button class="btn" id="exportData">Exportar mis datos</button>
+        <button class="btn" id="importData">Importar</button>
+        <button class="btn" id="resetData">Reiniciar álbum</button>
+        <button class="btn" id="logout">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <p class="group-title" style="margin-top:24px">Conexión Supabase</p>
+    <div class="form">
+      <label>Project URL
+        <input id="sbUrl" placeholder="https://xxxx.supabase.co" />
+      </label>
+      <label>Anon key
+        <input id="sbKey" placeholder="eyJhbGciOi..." />
+      </label>
+      <div class="toolbar">
+        <button class="btn primary" id="connectSB">Conectar</button>
+        <button class="btn" id="disconnectSB">Desconectar</button>
+      </div>
+      <span class="help">Mientras no conectes, la app guarda todo en este navegador (localStorage) y muestra usuarios demo para matches.</span>
+    </div>
+  </section>
+</main>
+
+<nav class="tabs">
+  <button data-go="album"   class="active"><span class="ico">📒</span><span>Álbum</span></button>
+  <button data-go="missing"><span class="ico">🔎</span><span>Faltan</span></button>
+  <button data-go="dups"><span class="ico">♻️</span><span>Cambio</span></button>
+  <button data-go="matches"><span class="ico">🤝</span><span>Match</span></button>
+  <button data-go="me"><span class="ico">👤</span><span>Yo</span></button>
+</nav>
+
+<!-- Modal sticker -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="mTitle">—</h3>
+    <div class="sub" id="mSub">—</div>
+    <div class="counter">
+      <button id="mMinus">−</button>
+      <div class="val" id="mVal">0</div>
+      <button id="mPlus">+</button>
+    </div>
+    <div class="actions">
+      <button id="mClose">Cerrar</button>
+      <button class="primary" id="mSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Guardado</div>
+
+<script>
+/* ============================================================
+   FIGURITAS MUNDIAL 2026 — APP MVP
+   - Todo en localStorage por defecto
+   - Soporta Supabase si el usuario conecta su proyecto
+   ============================================================ */
+
+/* ---------- 1) Dataset: 993 figuritas ---------- */
+// Estructura: FWC 1-8, 48 equipos × 20, FWC 9-19, CC 1-14
+const TEAMS = [
+  ["MEX","México","🇲🇽","CONCACAF"],
+  ["RSA","Sudáfrica","🇿🇦","CAF"],
+  ["KOR","Corea del Sur","🇰🇷","AFC"],
+  ["CZE","Chequia","🇨🇿","UEFA"],
+  ["CAN","Canadá","🇨🇦","CONCACAF"],
+  ["BIH","Bosnia-Herzegovina","🇧🇦","UEFA"],
+  ["QAT","Catar","🇶🇦","AFC"],
+  ["SUI","Suiza","🇨🇭","UEFA"],
+  ["BRA","Brasil","🇧🇷","CONMEBOL"],
+  ["MAR","Marruecos","🇲🇦","CAF"],
+  ["HAI","Haití","🇭🇹","CONCACAF"],
+  ["SCO","Escocia","🏴","UEFA"],
+  ["USA","Estados Unidos","🇺🇸","CONCACAF"],
+  ["PAR","Paraguay","🇵🇾","CONMEBOL"],
+  ["AUS","Australia","🇦🇺","AFC"],
+  ["TUR","Turquía","🇹🇷","UEFA"],
+  ["GER","Alemania","🇩🇪","UEFA"],
+  ["CUW","Curazao","🇨🇼","CONCACAF"],
+  ["CIV","Costa de Marfil","🇨🇮","CAF"],
+  ["ECU","Ecuador","🇪🇨","CONMEBOL"],
+  ["NED","Países Bajos","🇳🇱","UEFA"],
+  ["JPN","Japón","🇯🇵","AFC"],
+  ["SWE","Suecia","🇸🇪","UEFA"],
+  ["TUN","Túnez","🇹🇳","CAF"],
+  ["BEL","Bélgica","🇧🇪","UEFA"],
+  ["EGY","Egipto","🇪🇬","CAF"],
+  ["IRN","Irán","🇮🇷","AFC"],
+  ["NZL","Nueva Zelanda","🇳🇿","OFC"],
+  ["ESP","España","🇪🇸","UEFA"],
+  ["CPV","Cabo Verde","🇨🇻","CAF"],
+  ["KSA","Arabia Saudita","🇸🇦","AFC"],
+  ["URU","Uruguay","🇺🇾","CONMEBOL"],
+  ["FRA","Francia","🇫🇷","UEFA"],
+  ["SEN","Senegal","🇸🇳","CAF"],
+  ["IRQ","Irak","🇮🇶","AFC"],
+  ["NOR","Noruega","🇳🇴","UEFA"],
+  ["ARG","Argentina","🇦🇷","CONMEBOL"],
+  ["ALG","Argelia","🇩🇿","CAF"],
+  ["AUT","Austria","🇦🇹","UEFA"],
+  ["JOR","Jordania","🇯🇴","AFC"],
+  ["POR","Portugal","🇵🇹","UEFA"],
+  ["COD","RD del Congo","🇨🇩","CAF"],
+  ["UZB","Uzbekistán","🇺🇿","AFC"],
+  ["COL","Colombia","🇨🇴","CONMEBOL"],
+  ["ENG","Inglaterra","🏴","UEFA"],
+  ["CRO","Croacia","🇭🇷","UEFA"],
+  ["GHA","Ghana","🇬🇭","CAF"],
+  ["PAN","Panamá","🇵🇦","CONCACAF"]
+]; // 48 equipos en el orden oficial del álbum
+
+const pad3 = n => String(n).padStart(3, "0");
+
+function buildStickers() {
+  const list = [];
+  let n = 1;
+
+  // 1) FWC 1-8 (introducción)
+  for (let i = 1; i <= 8; i++) {
+    list.push({ id: `FWC-${pad3(i)}`, num: n++, name: `FIFA World Cup ${i}`, cat: "fwc", team: "FIFA", flag: "🏆" });
+  }
+
+  // 2) 48 equipos × 20 figuritas = 960
+  //    Por equipo: 01 = Escudo, 02 = Plantel, 03..20 = Jugadores 1..18
+  TEAMS.forEach(([code, country, flag, conf]) => {
+    for (let j = 1; j <= 20; j++) {
+      let cat = "player", name = `${country} · Jugador ${j-2}`;
+      if (j === 1)      { cat = "team"; name = `${country} — Escudo`; }
+      else if (j === 2) { cat = "team"; name = `${country} — Plantel`; }
+      list.push({
+        id: `${code}-${pad3(j)}`, num: n++, name, cat,
+        team: code, country, flag, conf
+      });
+    }
+  });
+
+  // 3) FWC 9-19 (continuación, después de los equipos)
+  for (let i = 9; i <= 19; i++) {
+    list.push({ id: `FWC-${pad3(i)}`, num: n++, name: `FIFA World Cup ${i}`, cat: "fwc", team: "FIFA", flag: "🏆" });
+  }
+
+  // 4) Coca-Cola CC 1-14
+  for (let i = 1; i <= 14; i++) {
+    list.push({ id: `CC-${pad3(i)}`, num: n++, name: `Coca-Cola ${i}`, cat: "cc", team: "CC", flag: "🥤" });
+  }
+
+  return list; // 8 + 960 + 11 + 14 = 993
+}
+const STICKERS = buildStickers();
+
+/* ---------- 2) Estado y persistencia ---------- */
+const LS_KEY = "fig-wc2026-v2";
+const DEFAULT_STATE = {
+  inv: {},                 // { stickerId: count }
+  auth: { email:"", loggedIn:false, mode:"supabase" }, // mode: 'local' | 'supabase'
+  profile: { name:"", whats:"", city:"", country:"Argentina", zone:"", visibility:"public" },
+  supabase: { url:"", key:"" }
+};
+let state = makeDefaultState();
+
+function makeDefaultState() {
+  return {
+    inv: {},
+    auth: { ...DEFAULT_STATE.auth },
+    profile: { ...DEFAULT_STATE.profile },
+    supabase: { ...DEFAULT_STATE.supabase }
+  };
+}
+function mergeSavedState(saved) {
+  state = {
+    ...makeDefaultState(),
+    ...(saved || {}),
+    inv: { ...((saved && saved.inv) || {}) },
+    auth: { ...DEFAULT_STATE.auth, ...((saved && saved.auth) || {}) },
+    profile: { ...DEFAULT_STATE.profile, ...((saved && saved.profile) || {}) },
+    supabase: { ...DEFAULT_STATE.supabase, ...((saved && saved.supabase) || {}) }
+  };
+}
+function userStateKey(email) {
+  return `${LS_KEY}:user:${String(email || "").trim().toLowerCase()}`;
+}
+function loadState(key = LS_KEY) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) mergeSavedState(JSON.parse(raw));
+  } catch(e){}
+}
+function saveState() {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+  if (state.auth.email) localStorage.setItem(userStateKey(state.auth.email), JSON.stringify(state));
+}
+
+/* ---------- 3) Util ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(()=> t.classList.remove("show"), 1600);
+}
+
+/* ---------- 4) Render ---------- */
+function countBy() {
+  let total = STICKERS.length, have = 0, dup = 0;
+  for (const s of STICKERS) {
+    const c = state.inv[s.id] || 0;
+    if (c >= 1) have++;
+    if (c >= 2) dup++;
+  }
+  return { total, have, dup, missing: total - have };
+}
+function refreshStats() {
+  const c = countBy();
+  $("#statTotal").textContent = c.total;
+  $("#statHave").textContent = c.have;
+  $("#statMissing").textContent = c.missing;
+  $("#statDup").textContent = c.dup;
+  const who = state.profile.name || (state.auth.email ? state.auth.email.split("@")[0] : "Invitado");
+  const zone = state.profile.zone ? ` · ${state.profile.zone}` : "";
+  $("#whoLabel").textContent = `${who}${zone}`;
+  // Progress bar
+  const pct = c.total ? (c.have / c.total) * 100 : 0;
+  const pctTxt = pct >= 99.95 ? "100%" : pct.toFixed(1).replace(/\.0$/,"") + "%";
+  const fill = $("#progressFill");
+  const star = $("#progressStar");
+  if (fill) fill.style.width = pct + "%";
+  if (star) star.style.left  = Math.max(2, Math.min(98, pct)) + "%";
+  if ($("#progressPct")) $("#progressPct").textContent = pctTxt;
+  if ($("#progressOf"))  $("#progressOf").textContent  = `${c.have} / ${c.total}`;
+  if ($("#progressLbl")) {
+    let lbl = "del álbum completo";
+    if (c.have === c.total && c.total > 0) { lbl = "¡ÁLBUM COMPLETO! 🏆"; $("#progressLbl").classList.add("progress-celebrate"); }
+    else if (pct >= 90) lbl = "casi lo completás 🔥";
+    else if (pct >= 50) lbl = "vas más que la mitad 💪";
+    else if (pct >= 25) lbl = "buen ritmo ⚽";
+    else                lbl = "del álbum completo";
+    if (!(c.have === c.total && c.total > 0)) $("#progressLbl").classList.remove("progress-celebrate");
+    $("#progressLbl").textContent = lbl;
+  }
+}
+
+function teamSelectFill() {
+  const sel = $("#teamAlbum");
+  sel.innerHTML = '<option value="">Todos los equipos</option>' +
+    TEAMS.map(([c,n,f]) => `<option value="${c}">${f} ${n}</option>`).join("");
+}
+
+function stickerCard(s) {
+  const c = state.inv[s.id] || 0;
+  const cls = c >= 2 ? "dup" : (c >= 1 ? "have" : "");
+  const num = String(s.num).padStart(3, "0");
+  const flag = s.flag || "";
+  return `<div class="sticker ${cls}" data-id="${s.id}" title="${s.name}">
+    <span class="num">${num}</span>
+    <div style="font-size:18px;line-height:1">${flag}</div>
+    <div class="name">${s.name}</div>
+    <div class="cat">${labelCat(s.cat)}</div>
+    ${c>0 ? `<span class="count">x${c}</span>` : ""}
+  </div>`;
+}
+function labelCat(c){ return ({fwc:"FWC", team:"Equipo", player:"Jugador", cc:"Coca-Cola"})[c] || c; }
+
+function filterAlbum() {
+  const q = ($("#qAlbum").value || "").trim().toLowerCase();
+  const cat = $("#catAlbum").value;
+  const team = $("#teamAlbum").value;
+  return STICKERS.filter(s => {
+    if (cat && s.cat !== cat) return false;
+    if (team && s.team !== team) return false;
+    if (!q) return true;
+    return (
+      s.name.toLowerCase().includes(q) ||
+      s.id.toLowerCase().includes(q) ||
+      String(s.num).padStart(3,"0").includes(q) ||
+      (s.team || "").toLowerCase().includes(q) ||
+      (s.country || "").toLowerCase().includes(q)
+    );
+  });
+}
+
+function renderAlbum() {
+  const list = filterAlbum();
+  // Agrupado por equipo (cuando sea team/player) o categoría
+  const groups = {};
+  for (const s of list) {
+    let key;
+    if (s.cat === "fwc")     key = "🏆 FIFA World Cup";
+    else if (s.cat === "cc") key = "🥤 Coca-Cola";
+    else                     key = `${s.flag || ""} ${s.country || s.team}`;
+    (groups[key] = groups[key] || []).push(s);
+  }
+  const html = Object.keys(groups).map(g => {
+    return `<p class="group-title">${g} <span style="opacity:.6">· ${groups[g].length}</span></p>
+            <div class="grid">${groups[g].map(stickerCard).join("")}</div>`;
+  }).join("");
+  $("#albumView").innerHTML = html || `<div class="empty">Sin resultados</div>`;
+}
+
+function renderMissing() {
+  const q = ($("#qMissing").value || "").trim().toLowerCase();
+  const list = STICKERS.filter(s => (state.inv[s.id] || 0) === 0)
+    .filter(s => !q || s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q) || (s.country||"").toLowerCase().includes(q));
+  if (!list.length) { $("#missingView").innerHTML = `<div class="empty">¡No te falta ninguna! 🏆</div>`; return; }
+  $("#missingView").innerHTML = `<div class="grid">${list.map(stickerCard).join("")}</div>`;
+}
+function renderDups() {
+  const q = ($("#qDups").value || "").trim().toLowerCase();
+  const list = STICKERS.filter(s => (state.inv[s.id] || 0) >= 2)
+    .filter(s => !q || s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q) || (s.country||"").toLowerCase().includes(q));
+  if (!list.length) { $("#dupsView").innerHTML = `<div class="empty">Todavía no marcaste figuritas repetidas.</div>`; return; }
+  $("#dupsView").innerHTML = `<div class="grid">${list.map(stickerCard).join("")}</div>`;
+}
+
+/* ---------- 5) Modal de detalle ---------- */
+let modalSticker = null, modalCount = 0;
+function openSticker(id) {
+  const s = STICKERS.find(x => x.id === id);
+  if (!s) return;
+  modalSticker = s;
+  modalCount = state.inv[id] || 0;
+  $("#mTitle").textContent = `${s.flag||""} ${s.name}`;
+  $("#mSub").textContent = `#${String(s.num).padStart(3,"0")} · ${labelCat(s.cat)} · ${s.id}`;
+  $("#mVal").textContent = modalCount;
+  $("#modalBg").classList.add("show");
+}
+function closeModal(){ $("#modalBg").classList.remove("show"); modalSticker = null; }
+
+function setStickerCount(id, count) {
+  const cleanCount = Math.max(0, Math.min(99, Number(count) || 0));
+  state.inv[id] = cleanCount;
+  saveState();
+  refreshStats();
+  renderAlbum(); renderMissing(); renderDups();
+  syncToSupabaseSticker(id, cleanCount);
+  onlineMatches = null;
+}
+
+function normalizeStickerCode(raw) {
+  const compact = String(raw || "").trim().toUpperCase().replace(/\s+/g, "").replace("-", "");
+  const match = compact.match(/^([A-Z]{2,3})(\d{2,3})$/);
+  if (!match) return "";
+  const prefix = match[1];
+  const num = String(Number(match[2])).padStart(3, "0");
+  return `${prefix}-${num}`;
+}
+
+function statusForCount(count) {
+  if (count >= 2) return `La tenés repetida: ${count - 1} disponible${count > 2 ? "s" : ""} para cambiar.`;
+  if (count === 1) return "La tenés pegada en el álbum.";
+  return "Te falta. La podés pegar cuando la consigas.";
+}
+
+function renderCodeLookup() {
+  const result = $("#codeResult");
+  const id = normalizeStickerCode($("#codeLookup").value);
+  if (!id) {
+    result.innerHTML = "Usá el formato de tres letras y dos números, por ejemplo ARG12. También sirve ARG-012.";
+    return;
+  }
+  const s = STICKERS.find(x => x.id === id);
+  if (!s) {
+    result.innerHTML = `<div class="empty" style="padding:14px">No encontré la figurita ${id}. Revisá el código.</div>`;
+    return;
+  }
+  const count = state.inv[s.id] || 0;
+  result.innerHTML = `<div class="lookup-card">
+    <div>
+      <strong>${s.flag || ""} ${s.name}</strong>
+      <div>#${String(s.num).padStart(3,"0")} · ${s.id} · ${labelCat(s.cat)}</div>
+      <div>${statusForCount(count)}</div>
+    </div>
+    <div class="lookup-actions">
+      <button class="btn" data-lookup-action="open" data-id="${s.id}">Ver</button>
+      <button class="btn primary" data-lookup-action="paste" data-id="${s.id}">Pegar</button>
+      <button class="btn" data-lookup-action="dup" data-id="${s.id}">+ repetida</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- 6) Matches (demo + Supabase si hay) ---------- */
+const DEMO_USERS = [
+  { id:"demo-1", name:"Lucia",  zone:"Centro",          city:"Rosario",      country:"Argentina", whats:"5493415551234",
+    have:["ARG-001","ARG-012","BRA-004","FRA-009","FWC-001","CC-003","JPN-002","ENG-015","POR-008"],
+    need:["ARG-010","ARG-011","URU-005","ESP-012","POR-014"] },
+  { id:"demo-2", name:"Mateo",  zone:"Palermo",         city:"Buenos Aires", country:"Argentina", whats:"5491143218765",
+    have:["ARG-010","URU-005","COL-007","MEX-013","BRA-015","CAN-004","SUI-010"],
+    need:["ARG-012","ARG-001","FRA-009","JPN-002"] },
+  { id:"demo-3", name:"Sofia",  zone:"Pocitos",         city:"Montevideo",   country:"Uruguay",   whats:"59899551234",
+    have:["URU-001","URU-012","URU-014","ARG-011","ESP-012","NED-006"],
+    need:["ARG-012","BRA-004","FWC-001","CC-007"] },
+  { id:"demo-4", name:"Diego",  zone:"Nueva Córdoba",   city:"Córdoba",      country:"Argentina", whats:"5493515551122",
+    have:["FRA-009","POR-008","BEL-002","CRO-004","TUR-006","GHA-013","CIV-009"],
+    need:["ARG-012","BRA-004","JPN-002","FWC-001"] },
+  { id:"demo-5", name:"Tomás",  zone:"Caballito",       city:"Buenos Aires", country:"Argentina", whats:"5491155556677",
+    have:["ARG-012","ARG-011","ARG-013","FWC-001","FWC-004","BRA-009","ESP-015","CC-002"],
+    need:["URU-001","JPN-002","FRA-009","CC-003","POR-008"] },
+];
+
+function computeMatches() {
+  const myHave = new Set(STICKERS.filter(s => (state.inv[s.id]||0) >= 2).map(s=>s.id));
+  const myNeed = new Set(STICKERS.filter(s => (state.inv[s.id]||0) === 0).map(s=>s.id));
+  const mode = $("#modeMatch").value;
+  const q = ($("#qMatch").value || "").trim().toLowerCase();
+  return DEMO_USERS
+    .filter(u => !q || u.name.toLowerCase().includes(q) || u.city.toLowerCase().includes(q))
+    .map(u => {
+      const theyGiveMe = u.have.filter(id => myNeed.has(id));   // tienen lo que me falta
+      const iGiveThem  = u.need.filter(id => myHave.has(id));   // necesitan mis repetidas
+      let score = 0;
+      if (mode === "have") score = theyGiveMe.length;
+      else if (mode === "need") score = iGiveThem.length;
+      else score = Math.min(theyGiveMe.length, iGiveThem.length) * 2 + theyGiveMe.length + iGiveThem.length;
+      return { u, theyGiveMe, iGiveThem, score };
+    })
+    .filter(m => m.score > 0)
+    .sort((a,b) => b.score - a.score);
+}
+function nameById(id){ const s = STICKERS.find(x=>x.id===id); return s ? `#${String(s.num).padStart(3,"0")} ${s.name}` : id; }
+
+async function renderMatches() {
+  // Cuando estamos online y autenticados, usamos f_matches() del servidor
+  if (sb && currentUser) {
+    if (!onlineMatches) onlineMatches = await fetchOnlineMatches();
+    const q = ($("#qMatch").value || "").trim().toLowerCase();
+    const list = (onlineMatches || [])
+      .filter(u => !q || (u.name||"").toLowerCase().includes(q) || (u.city||"").toLowerCase().includes(q) || (u.zone||"").toLowerCase().includes(q));
+    if (!list.length) {
+      $("#matchView").innerHTML = `<div class="empty">Sin coincidencias por ahora. Cuando otros usuarios marquen sus repetidas y faltantes vas a aparecer acá.</div>`;
+      $("#matchHint").style.display = "none";
+      return;
+    }
+    $("#matchHint").style.display = "none";
+    $("#matchView").innerHTML = list.map(u => {
+      const inits = (u.name||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+      const wa = u.whats ? `https://wa.me/${u.whats}?text=${encodeURIComponent(`Hola ${u.name}, vi que podemos cambiar figuritas del Mundial 2026. Te escribo desde la app. ¿Coordinamos?`)}` : "";
+      return `<div class="row">
+        <div class="row-h">
+          <div class="av">${inits}</div>
+          <div class="meta">
+            <div class="name">${u.name}</div>
+            <div class="loc">${u.zone ? u.zone + " · " : ""}${u.city||""}${u.country?" · "+u.country:""}</div>
+          </div>
+          <div style="margin-left:auto"><span class="pill" title="Score">⭐ ${u.score}</span></div>
+        </div>
+        <div class="pills">
+          <span class="pill good">Te da ${u.they_give_me}</span>
+          <span class="pill bad">Le das ${u.i_give_them}</span>
+        </div>
+        <div class="row-actions">
+          ${wa ? `<a class="btn success" href="${wa}" target="_blank" rel="noopener">💬 WhatsApp</a>` : ""}
+        </div>
+      </div>`;
+    }).join("");
+    return;
+  }
+  // Modo offline / sin auth → demo
+  const matches = computeMatches();
+  if (!matches.length) {
+    $("#matchView").innerHTML = `<div class="empty">Todavía no hay coincidencias. Marcá repetidas y faltantes para que aparezcan.</div>`;
+    return;
+  }
+  $("#matchView").innerHTML = matches.map(m => {
+    const wa = m.u.whats ? `https://wa.me/${m.u.whats}?text=${encodeURIComponent(`Hola ${m.u.name}, vi que podemos cambiar figuritas del Mundial 2026. Yo te puedo dar: ${m.iGiveThem.slice(0,5).map(nameById).join(", ")}. Vos tenés: ${m.theyGiveMe.slice(0,5).map(nameById).join(", ")}. ¿Coordinamos?`)}` : "";
+    const inits = m.u.name.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+    return `<div class="row">
+      <div class="row-h">
+        <div class="av">${inits}</div>
+        <div class="meta">
+          <div class="name">${m.u.name}</div>
+          <div class="loc">${m.u.zone ? m.u.zone + " · " : ""}${m.u.city} · ${m.u.country}</div>
+        </div>
+        <div style="margin-left:auto"><span class="pill" title="Score">⭐ ${m.score}</span></div>
+      </div>
+      <div class="pills">
+        <span class="pill good">Te da ${m.theyGiveMe.length}</span>
+        <span class="pill bad">Le das ${m.iGiveThem.length}</span>
+      </div>
+      <div style="margin-top:8px;font-size:12px;color:var(--muted)">
+        ${m.theyGiveMe.length ? `<b>Te da:</b> ${m.theyGiveMe.slice(0,6).map(nameById).join(", ")}${m.theyGiveMe.length>6?` (+${m.theyGiveMe.length-6})`:""}<br>` : ""}
+        ${m.iGiveThem.length  ? `<b>Le das:</b> ${m.iGiveThem.slice(0,6).map(nameById).join(", ")}${m.iGiveThem.length>6?` (+${m.iGiveThem.length-6})`:""}` : ""}
+      </div>
+      <div class="row-actions">
+        ${wa ? `<a class="btn success" href="${wa}" target="_blank" rel="noopener">💬 WhatsApp</a>` : ""}
+        <button class="btn" onclick="navigator.clipboard.writeText('${(m.theyGiveMe.concat(m.iGiveThem)).join(',')}');toast('Lista copiada')">Copiar IDs</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ---------- 7) Tabs ---------- */
+function go(tab) {
+  $$("section[data-tab]").forEach(s => s.hidden = (s.dataset.tab !== tab));
+  $$("nav.tabs button").forEach(b => b.classList.toggle("active", b.dataset.go === tab));
+  if (tab === "album")    renderAlbum();
+  if (tab === "missing")  renderMissing();
+  if (tab === "dups")     renderDups();
+  if (tab === "matches")  renderMatches();
+  if (tab === "me")       fillProfile();
+}
+
+function fillProfile() {
+  $("#pEmail").value   = state.auth.email || "";
+  $("#pName").value    = state.profile.name || "";
+  $("#pWhats").value   = state.profile.whats || "";
+  $("#pCity").value    = state.profile.city || "";
+  $("#pCountry").value = state.profile.country || "";
+  $("#pZone").value    = state.profile.zone || "";
+  $("#pVis").value     = state.profile.visibility || "public";
+  $("#sbUrl").value    = state.supabase.url || "";
+  $("#sbKey").value    = state.supabase.key || "";
+}
+
+/* ---------- 8) Eventos ---------- */
+function bind() {
+  $$("nav.tabs button").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+  // Album filtros
+  ["qAlbum","catAlbum","teamAlbum"].forEach(id => $("#"+id).addEventListener("input", renderAlbum));
+  // Click en figurita
+  document.body.addEventListener("click", (e) => {
+    const card = e.target.closest(".sticker");
+    if (card) openSticker(card.dataset.id);
+  });
+  // Modal
+  $("#mClose").addEventListener("click", closeModal);
+  $("#modalBg").addEventListener("click", (e)=>{ if(e.target.id==="modalBg") closeModal(); });
+  $("#mPlus").addEventListener("click", () => { modalCount = Math.min(99, modalCount+1); $("#mVal").textContent = modalCount; });
+  $("#mMinus").addEventListener("click", () => { modalCount = Math.max(0, modalCount-1); $("#mVal").textContent = modalCount; });
+  $("#mSave").addEventListener("click", () => {
+    if (!modalSticker) return;
+    setStickerCount(modalSticker.id, modalCount);
+    closeModal();
+    toast("Guardado");
+  });
+
+  $("#codeLookup").addEventListener("input", renderCodeLookup);
+  $("#codeLookup").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") renderCodeLookup();
+  });
+  $("#codeSearch").addEventListener("click", renderCodeLookup);
+  $("#codeResult").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-lookup-action]");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const count = state.inv[id] || 0;
+    if (btn.dataset.lookupAction === "open") openSticker(id);
+    if (btn.dataset.lookupAction === "paste") {
+      setStickerCount(id, Math.max(1, count));
+      renderCodeLookup();
+      toast("Marcada como pegada");
+    }
+    if (btn.dataset.lookupAction === "dup") {
+      setStickerCount(id, Math.max(2, count + 1));
+      renderCodeLookup();
+      toast("Repetida agregada");
+    }
+  });
+
+  // Faltantes
+  $("#qMissing").addEventListener("input", renderMissing);
+  $("#copyMissing").addEventListener("click", () => {
+    const ids = STICKERS.filter(s => (state.inv[s.id]||0)===0).map(s => s.id).join(",");
+    navigator.clipboard.writeText(ids); toast("Faltantes copiadas");
+  });
+  // Repetidas
+  $("#qDups").addEventListener("input", renderDups);
+  $("#copyDups").addEventListener("click", () => {
+    const ids = STICKERS.filter(s => (state.inv[s.id]||0)>=2).map(s => `${s.id}x${state.inv[s.id]-1}`).join(",");
+    navigator.clipboard.writeText(ids); toast("Repetidas copiadas");
+  });
+  // Matches
+  $("#qMatch").addEventListener("input", renderMatches);
+  $("#modeMatch").addEventListener("change", renderMatches);
+
+  // Perfil
+  $("#saveProfile").addEventListener("click", async () => {
+    state.profile = {
+      name: $("#pName").value.trim(),
+      whats: $("#pWhats").value.trim(),
+      city: $("#pCity").value.trim(),
+      country: $("#pCountry").value.trim(),
+      zone: $("#pZone").value.trim(),
+      visibility: $("#pVis").value
+    };
+    saveState(); refreshStats();
+    await syncProfileToSupabase();
+    onlineMatches = null;
+    toast("Perfil guardado");
+  });
+  $("#logout").addEventListener("click", () => {
+    if (!confirm("Cerrar sesión y volver al login? Tus datos del álbum quedan guardados.")) return;
+    if (sb) { sb.auth.signOut().catch(()=>{}); }
+    state.auth = { email:"", loggedIn:false, mode: state.auth.mode || "supabase" };
+    saveState();
+    showLogin();
+  });
+  $("#exportData").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `figuritas-wc2026-${(state.profile.name||"yo").toLowerCase()}.json`;
+    a.click();
+  });
+  $("#importData").addEventListener("click", () => {
+    const i = document.createElement("input"); i.type = "file"; i.accept = "application/json";
+    i.onchange = () => {
+      const f = i.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = () => { try { state = Object.assign(state, JSON.parse(r.result)); saveState(); refreshStats(); go("album"); toast("Importado"); } catch(e){ alert("JSON inválido"); } };
+      r.readAsText(f);
+    };
+    i.click();
+  });
+  $("#resetData").addEventListener("click", () => {
+    if (!confirm("¿Reiniciar todo el álbum? Esta acción no se puede deshacer.")) return;
+    state.inv = {}; saveState(); refreshStats(); renderAlbum(); toast("Álbum reiniciado");
+  });
+  $("#connectSB").addEventListener("click", async () => {
+    state.supabase = { url: $("#sbUrl").value.trim(), key: $("#sbKey").value.trim() };
+    state.auth.mode = "supabase";
+    saveState();
+    await initSupabase();
+    if (sb && !currentUser && state.auth.email) {
+      showLogin();
+      toast("Ingresá tu contraseña para conectar");
+    }
+  });
+  $("#disconnectSB").addEventListener("click", async () => {
+    if (sb) { try { await sb.auth.signOut(); } catch(e){} }
+    state.supabase = { url:"", key:"" }; saveState();
+    sb = null; currentUser = null; onlineMatches = null;
+    updateSyncBtn(); toast("Desconectado");
+  });
+  $("#syncBtn").addEventListener("click", () => go("me"));
+}
+
+/* ---------- 9) Supabase (auth + sync end-to-end) ---------- */
+let sb = null;
+let currentUser = null;        // objeto user de auth.getUser()
+let onlineMatches = null;      // cache del listado de matches reales
+
+function updateSyncBtn() {
+  const b = $("#syncBtn");
+  if (currentUser) { b.textContent = "● Online"; b.style.color = "#3fd17d"; b.style.borderColor = "#2a5b3c"; }
+  else if (sb)     { b.textContent = "○ Conectando"; b.style.color = "#ffd400"; b.style.borderColor = "#7a601f"; }
+  else             { b.textContent = "Offline"; b.style.color = ""; b.style.borderColor = ""; }
+}
+
+async function initSupabase() {
+  if (!state.supabase.url || !state.supabase.key) { sb = null; currentUser = null; updateSyncBtn(); return; }
+  if (!window.supabase) {
+    await new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      s.onload = res; s.onerror = rej; document.head.appendChild(s);
+    });
+  }
+  try {
+    sb = window.supabase.createClient(state.supabase.url, state.supabase.key, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+    updateSyncBtn();
+
+    // Si hay una sesión persistida, recuperamos el usuario sin pedir login otra vez.
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      currentUser = user;
+      await onAuthed();
+    }
+
+    // Listener para cambios de sesión iniciados por Supabase Auth.
+    sb.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        currentUser = session.user;
+        await onAuthed();
+      } else if (event === "SIGNED_OUT") {
+        currentUser = null; updateSyncBtn();
+      }
+    });
+
+  } catch(e) {
+    sb = null; currentUser = null; updateSyncBtn();
+    alert("No se pudo conectar a Supabase: " + e.message);
+  }
+}
+
+async function onAuthed() {
+  state.auth.email = currentUser.email || state.auth.email;
+  state.auth.loggedIn = true;
+  state.auth.mode = "supabase";
+  saveState();
+  updateSyncBtn();
+  hideLogin();
+  toast("Sesión iniciada");
+  await syncProfileToSupabase();    // upsert del perfil
+  await loadStickersFromSupabase(); // descarga inventario
+  refreshStats();
+  go("album");
+}
+
+async function syncProfileToSupabase() {
+  if (!sb || !currentUser) return;
+  const p = state.profile;
+  const { error } = await sb.from("profiles").upsert({
+    id: currentUser.id,
+    display_name: p.name || null,
+    whatsapp:     p.whats || null,
+    zone:         p.zone || null,
+    city:         p.city || null,
+    country:      p.country || null,
+    visibility:   p.visibility || "public",
+    updated_at:   new Date().toISOString()
+  });
+  if (error) console.warn("upsert profile:", error);
+}
+
+async function loadStickersFromSupabase() {
+  if (!sb || !currentUser) return;
+  const { data, error } = await sb
+    .from("user_stickers").select("sticker_id, count")
+    .eq("user_id", currentUser.id);
+  if (error) { console.warn("load user_stickers:", error); return; }
+  // Merge: lo que venga del server gana. Lo que tengamos local y no esté en server, lo subimos.
+  const remote = {};
+  (data || []).forEach(r => { remote[r.sticker_id] = r.count; });
+  // Subir locales que no estén en remote (caso primer login)
+  const toUpsert = [];
+  Object.entries(state.inv || {}).forEach(([sid, count]) => {
+    if (count > 0 && !(sid in remote)) {
+      toUpsert.push({ user_id: currentUser.id, sticker_id: sid, count, updated_at: new Date().toISOString() });
+    }
+  });
+  if (toUpsert.length) {
+    const { error: upErr } = await sb.from("user_stickers").upsert(toUpsert);
+    if (upErr) console.warn("backfill user_stickers:", upErr);
+    toUpsert.forEach(r => { remote[r.sticker_id] = r.count; });
+  }
+  state.inv = remote;
+  saveState();
+}
+
+async function syncToSupabaseSticker(id, count) {
+  if (!sb || !currentUser) return;
+  const { error } = await sb.from("user_stickers").upsert({
+    user_id: currentUser.id, sticker_id: id, count,
+    updated_at: new Date().toISOString()
+  });
+  if (error) console.warn("upsert sticker:", error);
+}
+
+async function fetchOnlineMatches() {
+  if (!sb || !currentUser) return null;
+  const { data, error } = await sb.rpc("f_matches", { p_user: currentUser.id });
+  if (error) { console.warn("f_matches:", error); return null; }
+  return (data || []).map(r => ({
+    id: r.other_user, name: r.display_name || "—",
+    zone: r.zone || "", city: r.city || "", country: r.country || "",
+    whats: r.whatsapp || "",
+    they_give_me: r.they_give_me, i_give_them: r.i_give_them, score: r.score
+  }));
+}
+
+/* ---------- 10) Login flow ---------- */
+function showLogin() {
+  $("#loginBg").classList.remove("hidden");
+  // Prefill if existing
+  $("#loginEmail").value   = state.auth.email || "";
+  $("#loginPassword").value = "";
+  $("#loginName").value    = state.profile.name || "";
+  $("#loginCity").value    = state.profile.city || "";
+  $("#loginCountry").value = state.profile.country || "Argentina";
+  $("#loginZone").value    = state.profile.zone || "";
+  $("#loginWhats").value   = state.profile.whats || "";
+  $("#loginSbUrl").value   = state.supabase.url || "";
+  $("#loginSbKey").value   = state.supabase.key || "";
+  const preferredMode = (state.supabase.url && state.supabase.key) ? (state.auth.mode || "supabase") : "local";
+  setLoginMode(preferredMode);
+}
+function hideLogin() { $("#loginBg").classList.add("hidden"); }
+function setLoginMode(mode) {
+  $$(".login-card .mode").forEach(m => m.classList.toggle("active", m.dataset.mode === mode));
+  $("#loginSbBox").style.display = (mode === "supabase") ? "block" : "none";
+  state.auth.mode = mode;
+}
+function isValidEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
+
+function readLoginForm() {
+  const email = $("#loginEmail").value.trim().toLowerCase();
+  return {
+    email,
+    password: $("#loginPassword").value,
+    profile: {
+      name: $("#loginName").value.trim(),
+      zone: $("#loginZone").value.trim(),
+      city: $("#loginCity").value.trim(),
+      country: $("#loginCountry").value.trim() || "Argentina",
+      whats: $("#loginWhats").value.trim()
+    }
+  };
+}
+
+function validateLoginForm({ email, password, profile }, requirePassword = true) {
+  if (!isValidEmail(email)) return "Ingresá un email válido.";
+  if (requirePassword && password.length < 6) return "La contraseña debe tener al menos 6 caracteres.";
+  if (!profile.zone) return "Decinos en qué zona vivís.";
+  if (!profile.name) return "Poné un apodo para mostrar.";
+  return "";
+}
+
+async function ensureSupabaseFromLogin() {
+  state.supabase.url = $("#loginSbUrl").value.trim();
+  state.supabase.key = $("#loginSbKey").value.trim();
+  if (!state.supabase.url || !state.supabase.key) throw new Error("Completá URL y anon key, o probá modo local.");
+  saveState();
+  await initSupabase();
+  if (!sb) throw new Error("No se pudo inicializar Supabase.");
+}
+
+function applyLoginProfile(email, profile, mode) {
+  state.auth.email = email;
+  state.auth.mode = mode;
+  state.profile.name = profile.name;
+  state.profile.zone = profile.zone;
+  state.profile.city = profile.city;
+  state.profile.country = profile.country;
+  state.profile.whats = profile.whats;
+}
+
+function finishLocalLogin(email, profile) {
+  const previousSupabase = { ...state.supabase };
+  loadState(userStateKey(email));
+  state.supabase = previousSupabase;
+  applyLoginProfile(email, profile, "local");
+  state.auth.loggedIn = true;
+  saveState();
+  hideLogin();
+  refreshStats();
+  go("album");
+  toast(`¡Bienvenido${profile.name ? ", " + profile.name : ""}!`);
+}
+
+function bindLogin() {
+  $$(".login-card .mode").forEach(m => m.addEventListener("click", () => setLoginMode(m.dataset.mode)));
+  $("#loginGo").addEventListener("click", async () => {
+    $("#loginErr").textContent = "";
+    const form = readLoginForm();
+    const err = validateLoginForm(form, state.auth.mode === "supabase");
+    if (err) { $("#loginErr").textContent = err; return; }
+
+    if (state.auth.mode === "local") {
+      finishLocalLogin(form.email, form.profile);
+      return;
+    }
+
+    try {
+      await ensureSupabaseFromLogin();
+      applyLoginProfile(form.email, form.profile, "supabase");
+      const { data, error } = await sb.auth.signInWithPassword({ email: form.email, password: form.password });
+      if (error) throw error;
+      currentUser = data.user;
+      await onAuthed();
+    } catch(e) {
+      $("#loginErr").textContent = "No pudimos iniciar sesión: " + e.message;
+    }
+  });
+
+  $("#signupGo").addEventListener("click", async () => {
+    $("#loginErr").textContent = "";
+    const form = readLoginForm();
+    const err = validateLoginForm(form, state.auth.mode === "supabase");
+    if (err) { $("#loginErr").textContent = err; return; }
+
+    if (state.auth.mode === "local") {
+      finishLocalLogin(form.email, form.profile);
+      return;
+    }
+
+    try {
+      await ensureSupabaseFromLogin();
+      applyLoginProfile(form.email, form.profile, "supabase");
+      const { data, error } = await sb.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: { data: { name: form.profile.name } }
+      });
+      if (error) throw error;
+      if (data.session) {
+        currentUser = data.user;
+        await onAuthed();
+      } else {
+        currentUser = null;
+        saveState();
+        $("#loginErr").innerHTML = `<span style="color:var(--good)">Cuenta creada. Si Supabase pide confirmar email, revisá tu casilla antes de entrar.</span>`;
+      }
+    } catch(e) {
+      $("#loginErr").textContent = "No pudimos crear la cuenta: " + e.message;
+    }
+  });
+}
+
+/* ---------- 11) Boot ---------- */
+loadState();
+teamSelectFill();
+bind();
+bindLogin();
+refreshStats();
+if (state.supabase.url && state.supabase.key) {
+  initSupabase().then(() => {
+    if (!currentUser && (!state.auth.loggedIn || !state.auth.email)) showLogin();
+    else if (!currentUser && state.auth.loggedIn) { hideLogin(); go("album"); }
+  });
+} else if (!state.auth.loggedIn || !state.auth.email) {
+  showLogin();
+} else {
+  hideLogin();
+  go("album");
+}
+</script>
+</body>
+</html>
